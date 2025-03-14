@@ -32,6 +32,13 @@ public class FixedWindowTokenBucketRateLimiter implements RateLimiter {
         Map<Integer, Integer> windowStartTokensRemainingMap = customerRemainingTokensMap.getOrDefault(customerId, new HashMap<>());
         int remainingTokens = windowStartTokensRemainingMap.getOrDefault(windowStart, maxTokens);
 
+        // Cleanup: Remove entries of expired windows
+        /*
+            If cleanup operation needs to be optimised then we can replace the map with a treeMap.
+            But that will impact the insertion complexity. It is a tradeoff
+         */
+        cleanupExpiredWindows(windowStartTokensRemainingMap);
+
         if (remainingTokens > 0) {
             // Allow the request and decrement the tokens
             windowStartTokensRemainingMap.put(windowStart, remainingTokens - 1);
@@ -41,5 +48,10 @@ public class FixedWindowTokenBucketRateLimiter implements RateLimiter {
 
         // Request denied
         return false;
+    }
+
+    private void cleanupExpiredWindows(Map<Integer, Integer> windowStartTokensRemainingMap) {
+        // Remove expired window entries
+        windowStartTokensRemainingMap.entrySet().removeIf(entry -> entry.getKey() < windowStart);
     }
 }
