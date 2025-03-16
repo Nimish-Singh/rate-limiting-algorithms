@@ -13,10 +13,13 @@ public class TokenBucketRateLimiter implements RateLimiter {
     private final int maxTokens;
     // Tokens added per second
     private final int refillRate;
+    // How often to refill tokens
+    private final int refillWindow;
 
-    public TokenBucketRateLimiter(int maxTokens, int refillRate) {
+    public TokenBucketRateLimiter(int maxTokens, int refillRate, int refillWindow) {
         this.maxTokens = maxTokens;
         this.refillRate = refillRate;
+        this.refillWindow = refillWindow;
         this.customerTokenBuckets = new HashMap<>();
     }
 
@@ -48,7 +51,7 @@ public class TokenBucketRateLimiter implements RateLimiter {
         Map<Integer, Integer> lastRefillTimeTokensMap = customerTokenBuckets.get(customerId);
         int lastRefillTime = lastRefillTimeTokensMap.keySet().stream().findFirst().get();
         int currentTokens = lastRefillTimeTokensMap.get(lastRefillTime);
-        int tokensToRefill = (timestamp - lastRefillTime) * refillRate;
+        int tokensToRefill = ((timestamp - lastRefillTime) / refillWindow) * refillRate;
 
         if (tokensToRefill > 0) {
             int tokensToReset = Math.min(currentTokens + tokensToRefill, maxTokens);

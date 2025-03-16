@@ -6,7 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class TokenBucketRateLimiterTest {
-    private final TokenBucketRateLimiter rateLimiter = new TokenBucketRateLimiter(5, 2);
+    private final TokenBucketRateLimiter rateLimiter = new TokenBucketRateLimiter(5, 2, 1);
 
     @Test
     public void shouldAllowRequestWhenMultipleCustomerRequestsIntertwine() {
