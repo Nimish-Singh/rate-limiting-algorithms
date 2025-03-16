@@ -1,20 +1,21 @@
 package ratelimiter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class LeakyBucketRateLimiter implements RateLimiter {
-    private final Map<Integer, LeakyBucket> customerBucketsMap;
+    private final ConcurrentMap<Integer, LeakyBucket> customerBucketsMap;
+
+    /*
+       Different from token bucket in the sense that token bucket refills tokens regularly
+       whereas leaky bucket refills only as per leakRate, when tokens become free
+    */
     private final int maxRequestCapacity;
     private final int leakRate;
     private final int leakWindow;
 
     public LeakyBucketRateLimiter(int maxRequestCapacity, int leakRate, int leakWindow) {
-        this.customerBucketsMap = new HashMap<>();
-        /*
-            Different from token bucket in the sense that token bucket refills tokens regularly
-            whereas leaky bucket refills only as per leakRate, when tokens become free
-         */
+        this.customerBucketsMap = new ConcurrentHashMap<>();
         this.maxRequestCapacity = maxRequestCapacity;
         this.leakRate = leakRate;
         this.leakWindow = leakWindow;
@@ -44,6 +45,10 @@ public class LeakyBucketRateLimiter implements RateLimiter {
             return;
         }
 
+         /*
+            Ideally for concurrent situations, get() and put() separately are susceptible to race condition.
+            In order to fix it, use compute() to combine the logic for checking and then updating map
+         */
         LeakyBucket bucket = customerBucketsMap.get(customerId);
         int lastUpdatedAt = bucket.getLastUpdatedAt();
         int currentRequestCount = bucket.getCurrentRequestCount();
