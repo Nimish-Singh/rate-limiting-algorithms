@@ -52,7 +52,8 @@ public class TokenBucketRateLimiter implements RateLimiter {
 
         if (tokensToRefill > 0) {
             int tokensToReset = Math.min(currentTokens + tokensToRefill, maxTokens);
-            lastRefillTimeTokensMap.clear();
+            // Effectively keeping this map as a single-entry map
+            lastRefillTimeTokensMap.remove(lastRefillTime);
             lastRefillTimeTokensMap.put(timestamp, tokensToReset);
         }
     }
