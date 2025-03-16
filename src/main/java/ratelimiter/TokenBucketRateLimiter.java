@@ -1,10 +1,10 @@
 package ratelimiter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class TokenBucketRateLimiter implements RateLimiter {
-    private final Map<Integer, TokenBucket> customerTokenBuckets;
+    private final ConcurrentMap<Integer, TokenBucket> customerTokenBuckets;
     // Maximum tokens the bucket can hold
     private final int maxTokens;
     // Tokens added per second
@@ -16,7 +16,7 @@ public class TokenBucketRateLimiter implements RateLimiter {
         this.maxTokens = maxTokens;
         this.refillRate = refillRate;
         this.refillWindow = refillWindow;
-        this.customerTokenBuckets = new HashMap<>();
+        this.customerTokenBuckets = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -43,6 +43,10 @@ public class TokenBucketRateLimiter implements RateLimiter {
             return;
         }
 
+        /*
+            Ideally for concurrent situations, get() and put() separately are susceptible to race condition.
+            In order to fix it, use compute() to combine the logic for checking and then updating map
+         */
         TokenBucket bucket = customerTokenBuckets.get(customerId);
         int lastRefillTime = bucket.getLastRefillTime();
         int currentTokens = bucket.getRemainingTokens();
