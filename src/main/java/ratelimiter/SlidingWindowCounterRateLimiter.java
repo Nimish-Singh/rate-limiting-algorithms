@@ -1,17 +1,17 @@
 package ratelimiter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class SlidingWindowCounterRateLimiter implements RateLimiter {
-    private final Map<Integer, RequestCounter> customerRequestCounterMap;
+    private final ConcurrentMap<Integer, RequestCounter> customerRequestCounterMap;
     private final int windowSize;
     private final int maxAllowedRequests;
 
     public SlidingWindowCounterRateLimiter(int windowSize, int maxAllowedRequests) {
         this.windowSize = windowSize;
         this.maxAllowedRequests = maxAllowedRequests;
-        customerRequestCounterMap = new HashMap<>();
+        customerRequestCounterMap = new ConcurrentHashMap<>();
     }
 
     @Override
