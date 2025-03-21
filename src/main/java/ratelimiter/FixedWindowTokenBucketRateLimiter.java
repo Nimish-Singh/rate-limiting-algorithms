@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// This is not actually a famous rate limiting algo but the first rough attempt to implement it in some way
 public class FixedWindowTokenBucketRateLimiter implements RateLimiter {
     // customer -> window start -> remaining tokens map
     /*
